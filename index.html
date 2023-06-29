@@ -3,7 +3,6 @@
 
 <head>
     <title>NST Money</title>
-    <!-- Add the Bootstrap stylesheet -->
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
@@ -69,7 +68,8 @@
                 .then(data => {
                     console.log('Dữ liệu đã được lưu trên API:', data);
                     alert('Chi tiêu đã được thêm thành công!');
-                    displayData(data)
+
+
                 })
                 .catch(error => {
                     console.error('Lỗi khi lưu dữ liệu lên API:', error);
@@ -85,10 +85,8 @@
             expenseList.innerHTML = '';
             totalExpenseByDate.innerHTML = '';
 
-            // Sort the data array based on the expenseDate in ascending order
             const sortedData = data.sort((a, b) => new Date(a.expenseDate) - new Date(b.expenseDate));
 
-            // Display the sorted data
             for (const item of sortedData) {
                 const { expenseName, expenseAmount, expenseDate } = item;
 
@@ -101,17 +99,34 @@
 
                 const expenseAmountEl = document.createElement('div');
                 expenseAmountEl.classList.add('col-md-4', 'text-center');
-                expenseAmountEl.textContent = `${expenseAmount} đ`;
+                expenseAmountEl.textContent = `${expenseAmount} K`;
 
                 const expenseDateEl = document.createElement('div');
                 expenseDateEl.classList.add('col-md-4', 'text-end');
-                expenseDateEl.textContent = `Ngày: ${expenseDate}`;
+
+                // Parse the expenseDate string and create a Date object
+                const dateObject = new Date(expenseDate);
+
+                // Format the date as dd/mm/yy
+                const formattedDate = dateObject.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit'
+                });
+
+                // Get the day of the week
+                const daysOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                const dayOfWeek = daysOfWeek[dateObject.getDay()];
+
+                expenseDateEl.textContent = `Ngày ${dayOfWeek}, ${formattedDate}`;
+
+
+
 
                 newExpense.appendChild(expenseContent);
                 newExpense.appendChild(expenseAmountEl);
                 newExpense.appendChild(expenseDateEl);
 
-                // Add a custom class to the row if the date is the same
                 if (isDateDuplicate(expenseDate)) {
                     newExpense.classList.add('date-duplicate');
                 }
@@ -126,32 +141,44 @@
             }
 
 
-            // Convert expensesByDate object into an array of objects
             const expenseDataArray = Object.entries(expensesByDate).map(([date, amount]) => ({
                 date,
                 amount
             }));
 
-            // Sort the array based on the date in ascending order
             expenseDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            // Display the sorted data
             for (const { date, amount } of expenseDataArray) {
                 const row = document.createElement('div');
                 row.classList.add('row', 'mb-2');
 
-                // Add a custom class to the row if the date is the same
                 if (isDateDuplicate(date)) {
                     row.classList.add('date-duplicate');
                 }
 
                 const dateColumn = document.createElement('div');
                 dateColumn.classList.add('col-md-6', 'text-center');
-                dateColumn.textContent = `Ngày ${date}`;
+
+                // Parse the date string and create a Date object
+                const dateObject = new Date(date);
+
+                // Get the day of the week
+                const daysOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+
+                const dayOfWeek = daysOfWeek[dateObject.getDay()];
+
+                // Format the date as dd/mm/yy
+                const formattedDate = `${dayOfWeek}, ${dateObject.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit'
+                })}`;
+
+                dateColumn.textContent = formattedDate;
+
 
                 const amountColumn = document.createElement('div');
                 amountColumn.classList.add('col-md-6', 'text-end');
-                amountColumn.textContent = `${amount} đ`;
+                amountColumn.textContent = `${amount} K`;
 
                 row.appendChild(dateColumn);
                 row.appendChild(amountColumn);
@@ -160,7 +187,6 @@
             }
         }
 
-        // Function to check if a date already exists in the expensesByDate object
         function isDateDuplicate(date) {
             return Object.keys(expensesByDate).includes(date);
         }
@@ -182,6 +208,7 @@
                     console.error('Lỗi khi lấy dữ liệu từ API:', error);
                     alert('Đã xảy ra lỗi khi GET lấy dữ liệu từ API!');
                 });
-        }, 1000); // Delay of 1 second (1000 milliseconds)
+        }, 1000); 
     </script>
+
 </body>

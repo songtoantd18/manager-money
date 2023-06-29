@@ -1,3 +1,14 @@
 .date-duplicate {
   background-color: #f0f0f0; /* Set your desired background color */
 }
+@media (max-width: 576px) {
+  /* Small devices (up to 576px) */
+  .form-group,
+  .btn {
+    width: 100%;
+  }
+
+  .btn {
+    margin-top: 10px;
+  }
+}
