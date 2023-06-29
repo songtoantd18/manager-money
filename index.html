@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NST Money</title>
+    <!-- Add the Bootstrap stylesheet -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <form id="expenseForm">
+            <div class="form-group">
+                <label for="expenseName">Tên chi tiêu:</label>
+                <input type="text" class="form-control" id="expenseName" required>
+            </div>
+            <div class="form-group">
+                <label for="expenseAmount">Số tiền:</label>
+                <input type="number" class="form-control" id="expenseAmount" required>
+            </div>
+            <div class="form-group">
+                <label for="expenseDate">Ngày:</label>
+                <input type="date" class="form-control" id="expenseDate" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Thêm chi tiêu</button>
+        </form>
+
+        <h2 class="mt-4">Danh sách chi tiêu</h2>
+        <ul id="expenseList"></ul>
+
+        <h2 class="mt-4">Tổng tiền theo ngày</h2>
+        <ul id="totalExpenseByDate"></ul>
+    </div>
+
+    <script>
+        const expenseNameInput = document.getElementById('expenseName');
+        const expenseAmountInput = document.getElementById('expenseAmount');
+        const expenseDateInput = document.getElementById('expenseDate');
+        const addButton = document.querySelector('button[type="submit"]');
+
+        addButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('ok123:', 'ok123');
+            const expenseName = expenseNameInput.value;
+            const expenseAmount = expenseAmountInput.value;
+            const expenseDate = expenseDateInput.value;
+
+            const newExpense = {
+                expenseName: expenseName,
+                expenseAmount: expenseAmount,
+                expenseDate: expenseDate
+            };
+            console.log("🚀 ~ file: index.html:47 ~ addButton.addEventListener ~ newExpense:", newExpense)
+
+
+            fetch('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newExpense)
+            })
+                .then(response => {
+                    console.log('response get:', response);
+                    return response.json()
+                })
+                .then(data => {
+                    console.log('Dữ liệu đã được lưu trên API:', data);
+                    alert('Chi tiêu đã được thêm thành công!');
+                    displayData(data)
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lưu dữ liệu lên API:', error);
+                    alert('Đã xảy ra lỗi khi POST thêm chi tiêu!');
+                });
+        });
+
+        const expenseList = document.getElementById('expenseList');
+        const totalExpenseByDate = document.getElementById('totalExpenseByDate');
+        const expensesByDate = {};
+
+        function displayData(data) {
+            expenseList.innerHTML = '';
+            totalExpenseByDate.innerHTML = '';
+
+            // Sort the data array based on the expenseDate in ascending order
+            const sortedData = data.sort((a, b) => new Date(a.expenseDate) - new Date(b.expenseDate));
+
+            // Display the sorted data
+            for (const item of sortedData) {
+                const { expenseName, expenseAmount, expenseDate } = item;
+
+                const newExpense = document.createElement('li');
+                newExpense.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+                const expenseContent = document.createElement('div');
+                expenseContent.classList.add('col-md-4');
+                expenseContent.textContent = expenseName;
+
+                const expenseAmountEl = document.createElement('div');
+                expenseAmountEl.classList.add('col-md-4', 'text-center');
+                expenseAmountEl.textContent = `${expenseAmount} đ`;
+
+                const expenseDateEl = document.createElement('div');
+                expenseDateEl.classList.add('col-md-4', 'text-end');
+                expenseDateEl.textContent = `Ngày: ${expenseDate}`;
+
+                newExpense.appendChild(expenseContent);
+                newExpense.appendChild(expenseAmountEl);
+                newExpense.appendChild(expenseDateEl);
+
+                // Add a custom class to the row if the date is the same
+                if (isDateDuplicate(expenseDate)) {
+                    newExpense.classList.add('date-duplicate');
+                }
+
+                expenseList.appendChild(newExpense);
+
+                if (expensesByDate[expenseDate]) {
+                    expensesByDate[expenseDate] += parseInt(expenseAmount);
+                } else {
+                    expensesByDate[expenseDate] = parseInt(expenseAmount);
+                }
+            }
+
+
+            // Convert expensesByDate object into an array of objects
+            const expenseDataArray = Object.entries(expensesByDate).map(([date, amount]) => ({
+                date,
+                amount
+            }));
+
+            // Sort the array based on the date in ascending order
+            expenseDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Display the sorted data
+            for (const { date, amount } of expenseDataArray) {
+                const row = document.createElement('div');
+                row.classList.add('row', 'mb-2');
+
+                // Add a custom class to the row if the date is the same
+                if (isDateDuplicate(date)) {
+                    row.classList.add('date-duplicate');
+                }
+
+                const dateColumn = document.createElement('div');
+                dateColumn.classList.add('col-md-6', 'text-center');
+                dateColumn.textContent = `Ngày ${date}`;
+
+                const amountColumn = document.createElement('div');
+                amountColumn.classList.add('col-md-6', 'text-end');
+                amountColumn.textContent = `${amount} đ`;
+
+                row.appendChild(dateColumn);
+                row.appendChild(amountColumn);
+
+                totalExpenseByDate.appendChild(row);
+            }
+        }
+
+        // Function to check if a date already exists in the expensesByDate object
+        function isDateDuplicate(date) {
+            return Object.keys(expensesByDate).includes(date);
+        }
+
+
+
+
+
+        setTimeout(() => {
+            fetch('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager')
+                .then(response => {
+                    console.log('response:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    displayData(data);
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy dữ liệu từ API:', error);
+                    alert('Đã xảy ra lỗi khi GET lấy dữ liệu từ API!');
+                });
+        }, 1000); // Delay of 1 second (1000 milliseconds)
+    </script>
+</body>
