@@ -45,6 +45,10 @@
             const expenseName = expenseNameInput.value;
             const expenseAmount = expenseAmountInput.value;
             const expenseDate = expenseDateInput.value;
+            if (expenseName === '' || expenseAmount === '' || expenseDate === '') {
+                alert('Vui lòng điền đầy đủ thông tin');
+                return; // Ngăn chặn việc gửi yêu cầu POST nếu dữ liệu không hợp lệ
+            }
 
             const newExpense = {
                 expenseName: expenseName,
