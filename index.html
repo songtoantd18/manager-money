@@ -5,6 +5,8 @@
     <title>NST Money</title>
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 
 <body>
@@ -25,12 +27,16 @@
 
             <button type="submit" class="btn btn-primary">Thêm chi tiêu</button>
         </form>
-
+        <br>
+        <button type="reset" class="btn btn-secondary" id="resetButton">Reset</button>
         <h2 class="mt-4">Danh sách chi tiêu</h2>
         <ul id="expenseList"></ul>
 
         <h2 class="mt-4">Tổng tiền theo ngày</h2>
+
         <ul id="totalExpenseByDate"></ul>
+
+
     </div>
 
     <script>
@@ -38,10 +44,47 @@
         const expenseAmountInput = document.getElementById('expenseAmount');
         const expenseDateInput = document.getElementById('expenseDate');
         const addButton = document.querySelector('button[type="submit"]');
+        const resetButton = document.getElementById('resetButton');
+        const password = 77;
 
+        resetButton.addEventListener('click', () => {
+            const inputPassword = parseInt(prompt('Enter the password:'));
+
+            if (inputPassword !== password) {
+                alert('Incorrect password.');
+            } else {
+
+
+                setTimeout(() => {
+                    const numberCheck = 10
+                    for (let id = 1; id <= numberCheck; id++) {
+                        axios.delete(`https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager/${id}`)
+                            .then(response => {
+
+
+                                if (response.status !== 200) {
+                                    throw new Error('Failed to delete data from API');
+                                }
+
+                                expenseName.value = '';
+                                expenseAmount.value = '';
+                                expenseDate.value = '';
+
+
+                                if (id === numberCheck) {
+                                    location.reload();
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error.message);
+                            });
+                    }
+                }, 2000);
+            }
+        });
         addButton.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('ok123:', 'ok123');
+
             const expenseName = expenseNameInput.value;
             const expenseAmount = expenseAmountInput.value;
             const expenseDate = expenseDateInput.value;
@@ -55,7 +98,7 @@
                 expenseAmount: expenseAmount,
                 expenseDate: expenseDate
             };
-            console.log("🚀 ~ file: index.html:47 ~ addButton.addEventListener ~ newExpense:", newExpense)
+
 
 
             fetch('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager', {
@@ -108,7 +151,6 @@
 
                 const expenseDateEl = document.createElement('div');
                 expenseDateEl.classList.add('col-md-4', 'text-end');
-
                 // Parse the expenseDate string and create a Date object
                 const dateObject = new Date(expenseDate);
 
@@ -187,7 +229,6 @@
 
                 row.appendChild(dateColumn);
                 row.appendChild(amountColumn);
-
                 totalExpenseByDate.appendChild(row);
             }
             let totalExpense = 0;
