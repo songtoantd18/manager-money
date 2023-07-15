@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+
 
 </head>
 
@@ -36,6 +40,9 @@
 
         <ul id="totalExpenseByDate"></ul>
 
+        <canvas id="myChart"></canvas>
+
+
 
     </div>
 
@@ -46,6 +53,7 @@
         const addButton = document.querySelector('button[type="submit"]');
         const resetButton = document.getElementById('resetButton');
         const password = 7777777;
+
 
         resetButton.addEventListener('click', () => {
             const inputPassword = parseInt(prompt('Enter the password:'));
@@ -230,6 +238,8 @@
                 row.appendChild(dateColumn);
                 row.appendChild(amountColumn);
                 totalExpenseByDate.appendChild(row);
+
+
             }
             let totalExpense = 0;
             for (const expense of data) {
@@ -246,10 +256,6 @@
             return Object.keys(expensesByDate).includes(date);
         }
 
-
-
-
-
         setTimeout(() => {
             fetch('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager')
                 .then(response => {
@@ -263,7 +269,68 @@
                     console.error('Lỗi khi lấy dữ liệu từ API:', error);
                     alert('Đã xảy ra lỗi khi GET lấy dữ liệu từ API!');
                 });
-        }, 1000); 
+        }, 1000);
+
+        const ctx = document.getElementById('myChart');
+
+        setTimeout(() => {
+            const expenseChartCanvas = ctx.getContext('2d');
+
+            const labels = [];
+            const data = [];
+            // Lấy các phần tử li từ totalExpenseByDate
+            const totalExpenseByDateElement = document.getElementById('totalExpenseByDate');
+            const expenseItems = totalExpenseByDateElement.querySelectorAll('.row.mb-2.date-duplicate');
+
+            // Lặp qua từng phần tử và truy cập thông tin bên trong
+            expenseItems.forEach((item) => {
+                const textCenter = item.querySelector('.text-center').textContent;
+                const textEnd = item.querySelector('.text-end').textContent;
+
+                labels.push(textCenter);
+                data.push(parseInt(textEnd)); // Chuyển đổi sang kiểu số nguyên
+
+            });
+
+            console.log('labels:', labels);
+            console.log('data:', data);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Expense',
+                        data: data,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            align: 'end',
+                            anchor: 'end',
+                            font: {
+                                weight: 'bold'
+                            },
+                            formatter: (value) => value + ' K'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                },
+                // Thêm tùy chọn để hiển thị số liệu
+                plugins: [ChartDataLabels]
+            });
+
+        }, 2000);
+
+
+
+
     </script>
 
 </body>
