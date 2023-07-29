@@ -61,35 +61,36 @@
             if (inputPassword !== password) {
                 alert('Incorrect password.');
             } else {
-
-
                 setTimeout(() => {
-                    const numberCheck = 10
-                    for (let id = 1; id <= numberCheck; id++) {
-                        axios.delete(`https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager/${id}`)
+                    const numberCheck = 100; // Số lần xóa từ 0-99
+                    let currentIndex = 0;
+
+                    const deleteData = () => {
+                        if (currentIndex >= numberCheck) {
+                            location.reload(); // Reload trang sau khi xóa xong
+                            return;
+                        }
+
+                        axios.delete(`https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager/${currentIndex}`)
                             .then(response => {
-
-
                                 if (response.status !== 200) {
                                     throw new Error('Failed to delete data from API');
                                 }
 
-                                expenseName.value = '';
-                                expenseAmount.value = '';
-                                expenseDate.value = '';
-
-
-                                if (id === numberCheck) {
-                                    location.reload();
-                                }
+                                currentIndex++; // Tăng index lên để xóa tiếp dữ liệu tiếp theo
+                                deleteData(); // Gọi lại hàm để xóa dữ liệu tiếp theo
                             })
                             .catch(error => {
                                 console.log(error.message);
                             });
-                    }
+                    };
+
+                    // Gọi hàm xóa dữ liệu lần đầu tiên
+                    deleteData();
                 }, 2000);
             }
         });
+
         addButton.addEventListener('click', (e) => {
             e.preventDefault();
 
