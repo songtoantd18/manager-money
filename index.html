@@ -32,7 +32,7 @@
             <button type="submit" class="btn btn-primary">Thêm chi tiêu</button>
         </form>
         <br>
-        <button type="reset" class="btn btn-secondary" id="resetButton">Reset</button>
+        <button id="resetButton" onclick="resetData()">Reset</button>
         <h2 class="mt-4">Danh sách chi tiêu</h2>
         <ul id="expenseList"></ul>
 
@@ -51,45 +51,38 @@
         const expenseAmountInput = document.getElementById('expenseAmount');
         const expenseDateInput = document.getElementById('expenseDate');
         const addButton = document.querySelector('button[type="submit"]');
-        const resetButton = document.getElementById('resetButton');
-        const password = 7777777;
+        // const resetButton = document.getElementById('resetButton');
 
 
-        resetButton.addEventListener('click', () => {
-            const inputPassword = parseInt(prompt('Enter the password:'));
+
+        async function resetData() {
+            const password = 7777777;// Mật khẩu bảo vệ
+            const inputPassword = parseInt(prompt('Nhập mật khẩu:'));
 
             if (inputPassword !== password) {
-                alert('Incorrect password.');
+                alert('Mật khẩu không đúng.');
             } else {
-                setTimeout(() => {
-                    const numberCheck = 100; // Số lần xóa từ 0-99
-                    let currentIndex = 0;
+                try {
+                    const response = await axios.get('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager');
+                    const data = response.data;
 
-                    const deleteData = () => {
-                        if (currentIndex >= numberCheck) {
-                            location.reload(); // Reload trang sau khi xóa xong
-                            return;
-                        }
+                    // Sử dụng Promise.all để đợi tất cả các yêu cầu DELETE hoàn thành
+                    await Promise.all(data
+                        .filter(item => item.id > 0)
+                        .map(async item => {
+                            const deleteResponse = await axios.delete(`https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager/${item.id}`);
+                            if (deleteResponse.status !== 200) {
+                                throw new Error('Lỗi khi xóa dữ liệu từ API');
+                            }
+                        })
+                    );
 
-                        axios.delete(`https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager/${currentIndex}`)
-                            .then(response => {
-                                if (response.status !== 200) {
-                                    throw new Error('Failed to delete data from API');
-                                }
-
-                                currentIndex++; // Tăng index lên để xóa tiếp dữ liệu tiếp theo
-                                deleteData(); // Gọi lại hàm để xóa dữ liệu tiếp theo
-                            })
-                            .catch(error => {
-                                console.log(error.message);
-                            });
-                    };
-
-                    // Gọi hàm xóa dữ liệu lần đầu tiên
-                    deleteData();
-                }, 2000);
+                    alert('Xóa hoàn toàn dữ liệu có id > 0 thành công');
+                } catch (error) {
+                    console.log(error.message);
+                }
             }
-        });
+        }
 
         addButton.addEventListener('click', (e) => {
             e.preventDefault();
