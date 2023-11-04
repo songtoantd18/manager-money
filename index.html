@@ -8,10 +8,18 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://media.twiliocdn.com/libs/twiliojs/1.16.0/twilio.min.js"></script>
+
 
 
 
 </head>
+<style>
+    .error-input {
+        background-color: pink;
+        /* Màu đỏ hoặc màu bạn muốn */
+    }
+</style>
 
 <body>
     <div class="container">
@@ -31,8 +39,26 @@
 
             <button type="submit" class="btn btn-primary">Thêm chi tiêu</button>
         </form>
+
+        <form>
+            <div class="form-group">
+                <label>Date from:</label>
+                <input type="date" class="form-control" id="datefrom" required>
+            </div>
+            <div class="form-group">
+                <label>Date to:</label>
+                <input type="date" class="form-control" id="dateto" required>
+            </div>
+            <button id="filterButton" class="btn btn-primary">Lọc dữ liệu</button>
+
+        </form>
+        <p id="dataShow"></p>
+
+        <button id="twilio" class="btn btn-primary">twilio</button>
+
         <br>
-        <button id="resetButton" onclick="resetData()">Reset</button>
+        <button id="resetButton" onclick="resetData()" class="btn btn-danger">Reset</button>
+
         <h2 class="mt-4">Danh sách chi tiêu</h2>
         <ul id="expenseList"></ul>
 
@@ -46,12 +72,24 @@
 
     </div>
 
-    <script>
+    <script src="index.js">
         const expenseNameInput = document.getElementById('expenseName');
         const expenseAmountInput = document.getElementById('expenseAmount');
         const expenseDateInput = document.getElementById('expenseDate');
         const addButton = document.querySelector('button[type="submit"]');
         // const resetButton = document.getElementById('resetButton');
+
+        const filterButton = document.getElementById('filterButton');
+        const dateFromInput = document.getElementById('datefrom');
+        const dateToInput = document.getElementById('dateto');
+        let dataBaseLocal = []
+
+
+
+
+
+
+
 
 
 
@@ -250,6 +288,7 @@
             return Object.keys(expensesByDate).includes(date);
         }
 
+
         setTimeout(() => {
             fetch('https://62fbae6be4bcaf53518af2ed.mockapi.io/api/manager')
                 .then(response => {
@@ -257,6 +296,8 @@
                     return response.json();
                 })
                 .then(data => {
+                    console.log("🚀 ~ file: index.html:293 ~ setTimeout ~ data:", data)
+                    dataBaseLocal = data
                     displayData(data);
                 })
                 .catch(error => {
@@ -264,6 +305,7 @@
                     alert('Đã xảy ra lỗi khi GET lấy dữ liệu từ API!');
                 });
         }, 1000);
+
 
         const ctx = document.getElementById('myChart');
 
@@ -321,6 +363,42 @@
             });
 
         }, 2000);
+
+        filterButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const fromDate = dateFromInput.value;
+            const toDate = dateToInput.value;
+
+            if (!fromDate || !toDate) {
+                alert('Vui lòng nhập 2 ô màu hồng ở dưới.');
+
+                // Thay đổi lớp CSS của các ô ngày để tô đỏ
+                if (!fromDate) {
+                    dateFromInput.classList.add('error-input');
+                }
+                if (!toDate) {
+                    dateToInput.classList.add('error-input');
+                }
+
+                return;
+            } else {
+                // Nếu cả hai ô đều đã điền, hãy xóa lớp CSS tô đỏ nếu nó đã được đặt
+                dateFromInput.classList.remove('error-input');
+                dateToInput.classList.remove('error-input');
+            }
+
+            let totalAmount = 0;
+            for (const item of dataBaseLocal) {
+                const expenseDate = item.expenseDate;
+                if (expenseDate >= fromDate && expenseDate <= toDate) {
+                    totalAmount += parseInt(item.expenseAmount);
+                }
+            }
+
+            const resultElement = document.getElementById('dataShow');
+            resultElement.textContent = `Tổng số tiền trong khoảng ngày: ${fromDate} đến ${toDate}: ${totalAmount} K`;
+        });
+
 
 
 
