@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <script src="https://media.twiliocdn.com/libs/twiliojs/1.16.0/twilio.min.js"></script>
+
 
 
 
@@ -54,7 +54,7 @@
         </form>
         <p id="dataShow"></p>
 
-        <button id="twilio" class="btn btn-primary">twilio</button>
+
 
         <br>
         <button id="resetButton" onclick="resetData()" class="btn btn-danger">Reset</button>
@@ -72,7 +72,7 @@
 
     </div>
 
-    <script src="index.js">
+    <script>
         const expenseNameInput = document.getElementById('expenseName');
         const expenseAmountInput = document.getElementById('expenseAmount');
         const expenseDateInput = document.getElementById('expenseDate');
@@ -83,16 +83,6 @@
         const dateFromInput = document.getElementById('datefrom');
         const dateToInput = document.getElementById('dateto');
         let dataBaseLocal = []
-
-
-
-
-
-
-
-
-
-
         async function resetData() {
             const password = 7777777;// Mật khẩu bảo vệ
             const inputPassword = parseInt(prompt('Nhập mật khẩu:'));
